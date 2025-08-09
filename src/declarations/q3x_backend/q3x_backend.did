@@ -1,0 +1,38 @@
+type Wallet = record {
+    signers: vec principal;
+    threshold: nat8;
+    message_queue: vec record { vec nat8; vec principal; }
+};
+
+type Message = record {
+    message: text;
+    signers: vec principal;
+};
+
+service : (text) -> {
+    create_wallet: (text, vec principal, nat8) -> (variant { Ok; Err: text });
+    get_wallet: (text) ->  (opt Wallet);
+    can_sign: (text, text) -> (bool);
+    propose: (text, text) -> (variant { Ok; Err: text });
+    approve: (text, text) -> (variant { Ok: nat8; Err: text });
+    sign: (text, text) -> (variant { Ok: text; Err: text });
+    verify_signature: (text, text, text) -> (variant { Ok: bool; Err: text });
+    eth_address : (text) -> (variant { Ok: text ; Err: text });
+
+    get_messages_to_sign: (text) -> (variant { Ok: vec text; Err: text });
+    get_proposed_messages: (text) -> (variant { Ok: vec text; Err: text });
+    get_messages_with_signers: (text) -> (variant { Ok: vec record { text; vec principal };  Err: text });
+
+    add_signer: (text, principal) -> (variant { Ok: text; Err: text });
+    remove_signer: (text, principal) -> (variant { Ok: text; Err: text });
+    set_threshold: (text, nat8) -> (variant { Ok: text; Err: text });
+
+    get_wallets_for_principal: (principal) -> (vec text);
+
+    add_metadata: (text, text, text) -> (variant { Ok; Err: text });
+    get_metadata: (text, text) -> (variant { Ok: text; Err: text });
+
+    propose_with_metadata: (text, text, text) -> (variant { Ok; Err: text });
+
+}
+

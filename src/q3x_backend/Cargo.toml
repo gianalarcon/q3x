@@ -1,0 +1,17 @@
+[package]
+name = "q3x_backend"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+candid = { workspace = true }
+ic-cdk = { workspace = true }
+serde = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+libsecp256k1 = { workspace = true }
+tiny-keccak = { workspace = true }
+ic-ledger-types = { workspace = true }
