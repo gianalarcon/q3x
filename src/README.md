@@ -1,15 +1,10 @@
-# ICP transfer
+# Q3x backend, ICP Ledger
 
-Q3x backend is a canister that supports transfer ICP from its account to other accounts. It uses the ledger canister.
-
-:::info
-
-The ICP ledger supports the ICRC1 standard, which is the recommended standard for token transfers. You can [read more about the differences](https://internetcomputer.org/docs/current/developer-docs/defi/overview).
-:::
+Q3x backend is a canister that supports multisig wallet and transfer ICP from its account to other accounts. It uses the ledger canister.
 
 ## Architecture
 
-The sample code revolves around one core transfer function which takes as input the amount of ICP to transfer, the account (and optionally the subaccount) to which to transfer ICP and returns either success or an error in case e.g. the Q3x backend canister doesn’t have enough ICP to do the transfer. In case of success, a unique identifier of the transaction is returned. This identifier will be stored in the memo of the transaction in the ledger.
+The sample code revolves around one core transfer function which takes as input the amount of ICP to transfer, the account (and optionally the subaccount) to which to transfer ICP and returns either success or an error in case e.g. The Q3x backend canister doesn’t have enough ICP to do the transfer. In case of success, a unique identifier of the transaction is returned. This identifier will be stored in the memo of the transaction in the ledger.
 
 This sample will use the Rust variant.
 
@@ -146,19 +141,19 @@ The output should be:
 generate-did q3x_backend && dfx deploy q3x_backend
 ```
 
-## Step 10: Determine out the address of your canister
+## Step 9: Determine out the address of q3x backend canister
 
 ```bash
 Q3X_BACKEND_ACCOUNT_ID="$(dfx ledger account-id --of-canister q3x_backend)"
 Q3X_BACKEND_ACCOUNT_ID_BYTES="$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$Q3X_BACKEND_ACCOUNT_ID'")]) + "}")')"
 ```
 
-## Step 11: Transfer funds to your canister
+## Step 10: Transfer funds to q3x backend canister
 
 > [!TIP]
 > Make sure that you are using the default `dfx` account that we minted tokens to in step 6 for the following steps.
 
-Check the balance of the canister. It should be 0.00000000 ICP.
+Check the balance of q3x backend canister. It should be 0.00000000 ICP.
 
 ```bash
 dfx ledger balance $Q3X_BACKEND_ACCOUNT_ID
@@ -167,7 +162,7 @@ dfx ledger balance $Q3X_BACKEND_ACCOUNT_ID
 Make the following call to transfer funds from the default account to the q3x backend canister:
 
 ```bash
-dfx canister call icp_ledger_canister transfer "(record { to = ${Q3X_BACKEND_ACCOUNT_ID_BYTES}; memo = 1; amount = record { e8s = 2_00_000_000 }; fee = record { e8s = 10_000 }; })"
+dfx canister call icp_ledger_canister transfer "(record { to = ${Q3X_BACKEND_ACCOUNT_ID_BYTES}; memo = 1; amount = record { e8s = 5_00_000_000 }; fee = record { e8s = 10_000 }; })"
 ```
 
 If successful, the output should be:
@@ -176,7 +171,7 @@ If successful, the output should be:
 (variant { Ok = 1 : nat64 })
 ```
 
-Check the balance of the canister. It should be 2.00000000 ICP.
+Check the balance of the canister. It should be 5.00000000 ICP.
 
 ```bash
 dfx ledger balance $Q3X_BACKEND_ACCOUNT_ID
@@ -206,7 +201,7 @@ Check the multisig wallet info
 dfx canister call q3x_backend get_wallet '("wallet-1")'
 ```
 
-## propose transfer funds to default account
+## Propose transfer funds to default account
 
 ```bash
 dfx canister call q3x_backend transfer "(\"${WalletId}\", 100_000_000, principal \"${Signer1}\")"
@@ -214,13 +209,15 @@ dfx canister call q3x_backend transfer "(\"${WalletId}\", 100_000_000, principal
 
 If successful, the output should be:
 
+```bash
 (
   variant {
     Ok = "hash_message"
   },
 )
+```
 
-## approve proposal
+## Approve proposal
 
 Copy the hash message from the output.
 
@@ -229,12 +226,12 @@ export HashMessage="hash_message" # 5452414e534645523a3a3130303030303030303a3a35
 dfx canister call q3x_backend approve "(\"${WalletId}\", \"${HashMessage}\")"
 ```
 
-## sign/execute proposal
+## Sign/execute proposal
 
-Check minter account balance. It should be 0.00000000 ICP.
+Check default account balance. It should be 0.00000000 ICP.
 
 ```bash
-dfx ledger balance $MINTER_ACCOUNT_ID
+dfx ledger balance $DEFAULT_ACCOUNT_ID
 ```
 
 Execute the proposal.
@@ -243,14 +240,4 @@ Execute the proposal.
 dfx canister call q3x_backend sign "(\"${WalletId}\", \"${HashMessage}\")"
 ```
 
-dfx canister call q3x_backend cre
-ate_wallet '("wallet-2", vec{ principal "djsxm-ovorb-ssxqa-2jxdo-yomfn-k52jv
--4aq3x-xgvql-usonf-ry2hu-wqe"; principal "advh6-jyrmn-ltg3k-l4fgl-65ti5-vnse
-e-j6i4a-gwcjk-riaz3-jqgjs-xae"}, 1)'
-(variant { Ok })
-
-dfx canister call q3x_backend transfer '("wallet-2", 100_000_000, principal "advh6-jyrmn-ltg3k-l4fgl-65ti5-vnsee-j6i4a-gwcjk-riaz3-jqgjs-xae")'
-
-dfx canister call q3x_backend approve '("wallet-2", "5452414e534645523a3a3130303030303030303a3a61647668362d6a79726d6e2d6c7467336b2d6c3466676c2d36357469352d766e7365652d6a366934612d6777636a6b2d7269617a332d6a71676a732d786165")'
-
-dfx canister call q3x_backend sign '("wallet-2", "5452414e534645523a3a3130303030303030303a3a61647668362d6a79726d6e2d6c7467336b2d6c3466676c2d36357469352d766e7365652d6a366934612d6777636a6b2d7269617a332d6a71676a732d786165")'
+Check default account balance. It should be around 96 ICP.
